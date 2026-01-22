@@ -1,0 +1,17 @@
+streamlit==1.28.1
+# LangChain ecosystem: use mutually compatible modern versions (Python 3.12 friendly)
+langchain>=1.2,<2
+langchain-core>=1.2,<2
+langchain-community>=0.4,<1
+langchain-text-splitters>=1.1,<2
+langchain-groq>=1.1,<2
+sentence-transformers>=2.3.0
+numpy>=1.26.0
+python-dotenv==1.0.0
+openai-whisper==20231117
+moviepy==1.0.3
+librosa==0.10.0
+torch>=2.2.0
+torchvision>=0.17.0
+torchaudio>=2.2.0
+pydantic>=2.1.0
