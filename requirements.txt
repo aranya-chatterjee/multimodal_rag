@@ -32,10 +32,10 @@ faiss-cpu
 
 # Video processing - OPTIONAL (will fail gracefully if not installed)
 # Uncomment these if you need video processing (may not work on Streamlit Cloud free tier)
-# torch
-# torchvision
-# torchaudio
-# openai-whisper
-# moviepy
-# librosa
-# soundfile
+torch
+torchvision
+torchaudio
+openai-whisper
+moviepy
+librosa
+soundfile
