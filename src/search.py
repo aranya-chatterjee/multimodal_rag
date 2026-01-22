@@ -32,31 +32,45 @@ class RAGSearch:
             print(f"[RAGSearch] Vector store manager type: {type(vector_store_manager)}")
     
     def _format_source_info(self, result, index: int) -> Dict[str, Any]:
-        """Format source information based on content type"""
+         """Format source information based on content type"""
         metadata = result.metadata
-        
+    
         if metadata.get('source_type') == 'video':
-            source_text = f"Video: {metadata.get('file_name', 'Unknown Video')}"
-            if 'duration' in metadata:
-                source_text += f" ({metadata['duration']:.2f}s)"
-            
-            # Add transcript quality info
+        # Get video name safely
+            video_name = metadata.get('file_name', 'Unknown Video')
+            source_text = f"Video: {video_name}"
+        
+        # Handle duration safely - it might be None
+            duration = metadata.get('duration')
+            if duration is not None:
+                try:
+                # Convert to float if it's a string
+                    if isinstance(duration, str):
+                        duration = float(duration)
+                    source_text += f" ({duration:.2f}s)"
+                except (ValueError, TypeError):
+                # If can't format as float, just show raw value
+                    source_text += f" (Duration: {duration})"
+        
+        # Add transcript quality info
             has_transcript = metadata.get('has_transcript', False)
             transcript_source = metadata.get('transcript_source', 'unknown')
-            
+        
             return {
                 'source_type': 'video',
                 'metadata': metadata,
                 'citation': f"[Source {index+1}: {source_text}]",
                 'content_preview': result.page_content[:200] + "..." if len(result.page_content) > 200 else result.page_content,
                 'has_transcript': has_transcript,
-                'transcript_source': transcript_source
+                'transcript_source': transcript_source,
+                'duration': duration  # Store the raw duration
             }
         else:
-            # Document source
-            source_text = f"Document: {metadata.get('file_name', 'Unknown')}"
-            
-            return {
+        # Document source
+            doc_name = metadata.get('file_name', 'Unknown Document')
+            source_text = f"Document: {doc_name}"
+        
+             return {
                 'source_type': 'document',
                 'metadata': metadata,
                 'citation': f"[Source {index+1}: {source_text}]",
