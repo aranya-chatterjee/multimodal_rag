@@ -32,27 +32,37 @@ class RAGSearch:
             print(f"[RAGSearch] Vector store manager type: {type(vector_store_manager)}")
     
     def _format_source_info(self, result, index: int) -> Dict[str, Any]:
-         """Format source information based on content type"""
+    """Format source information based on content type"""
         metadata = result.metadata
     
-        if metadata.get('source_type') == 'video':
-        # Get video name safely
-            video_name = metadata.get('file_name', 'Unknown Video')
+    # SAFE: Get source type with default
+        source_type = metadata.get('source_type', 'unknown')
+    
+        if source_type == 'video':
+        # SAFE: Get video name with default
+            video_name = metadata.get('file_name')
+            if video_name is None:
+                video_name = metadata.get('filename', 'Unknown Video')
+            if video_name is None:
+                video_name = 'Unknown Video'
+        
             source_text = f"Video: {video_name}"
         
-        # Handle duration safely - it might be None
+        # SAFE: Handle duration
             duration = metadata.get('duration')
             if duration is not None:
                 try:
-                # Convert to float if it's a string
+                # Convert to float if needed
                     if isinstance(duration, str):
                         duration = float(duration)
-                    source_text += f" ({duration:.2f}s)"
+                    if isinstance(duration, (int, float)):
+                        source_text += f" ({duration:.2f}s)"
+                    else:
+                        source_text += f" (Duration: {str(duration)})"
                 except (ValueError, TypeError):
-                # If can't format as float, just show raw value
-                    source_text += f" (Duration: {duration})"
+                    source_text += f" (Duration: {str(duration)})"
         
-        # Add transcript quality info
+        # SAFE: Get transcript info
             has_transcript = metadata.get('has_transcript', False)
             transcript_source = metadata.get('transcript_source', 'unknown')
         
@@ -63,15 +73,21 @@ class RAGSearch:
                 'content_preview': result.page_content[:200] + "..." if len(result.page_content) > 200 else result.page_content,
                 'has_transcript': has_transcript,
                 'transcript_source': transcript_source,
-                'duration': duration  # Store the raw duration
+                'duration': duration
             }
         else:
-        # Document source
-            doc_name = metadata.get('file_name', 'Unknown Document')
+        # Document or unknown source
+        # SAFE: Get document name
+            doc_name = metadata.get('file_name')
+            if doc_name is None:
+                doc_name = metadata.get('filename', 'Unknown Document')
+            if doc_name is None:
+                doc_name = 'Unknown Document'
+        
             source_text = f"Document: {doc_name}"
         
-             return {
-                'source_type': 'document',
+            return {
+                'source_type': 'document' if source_type != 'video' else source_type,
                 'metadata': metadata,
                 'citation': f"[Source {index+1}: {source_text}]",
                 'content_preview': result.page_content[:200] + "..." if len(result.page_content) > 200 else result.page_content
