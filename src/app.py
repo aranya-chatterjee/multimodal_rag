@@ -16,8 +16,8 @@ from vectorStore import VectorStoreManager
 from search import RAGSearch
 
 st.set_page_config(
-    page_title="VideoRAG - Local Video AI Assistant",
-    page_icon="🎬",
+    page_title="Multimodal RAG",
+    # page_icon="🎬",
     layout="wide"
 )
 
@@ -78,7 +78,7 @@ def process_document(uploaded_file):
         update_progress(10, "Saving file...")
         
         # Create temporary directory
-        temp_dir = tempfile.mkdtemp(prefix="videorag_")
+        temp_dir = tempfile.mkdtemp(prefix="MultimodalRAG")
         st.session_state.temp_dir = temp_dir
         data_dir = os.path.join(temp_dir, "data")
         os.makedirs(data_dir, exist_ok=True)
@@ -167,7 +167,7 @@ def process_video_file(uploaded_video):
         
         # Create temporary directory
         if st.session_state.temp_dir is None:
-            temp_dir = tempfile.mkdtemp(prefix="videorag_")
+            temp_dir = tempfile.mkdtemp(prefix="MultimodalRAG_")
             st.session_state.temp_dir = temp_dir
         else:
             temp_dir = st.session_state.temp_dir
@@ -320,7 +320,7 @@ st.markdown("""
 
 # Sidebar
 with st.sidebar:
-    st.title("🎬 VideoRAG")
+    st.title(" MultimodalRAG")
     st.markdown("---")
     
     # API Key status
@@ -471,7 +471,7 @@ with st.sidebar:
     st.caption("💡 Upload content and ask questions about it!")
 
 # Main content area
-st.title("🎬 VideoRAG - Local Video AI Assistant")
+st.title(" MultimodalRAG ")
 st.caption("Upload videos or documents, then ask questions about their content")
 
 # Source filter
@@ -585,7 +585,7 @@ else:
     
     with col1:
         st.markdown("""
-        ## 👋 Welcome to VideoRAG!
+        ## 👋 Welcome to MultimodalRAG!
         
         **Your personal AI assistant that understands videos and documents.**
         
@@ -640,7 +640,7 @@ else:
 st.markdown("---")
 footer_col1, footer_col2, footer_col3 = st.columns([2, 1, 1])
 with footer_col1:
-    st.caption("🎬 Powered by VideoRAG | 🤖 Whisper AI + Groq LLM | 🛠️ Built with Streamlit")
+    st.caption("🎬 Powered by MultimodalRAG | 🤖 Whisper AI + Groq LLM | 🛠️ Built with Streamlit")
 with footer_col2:
     if st.session_state.chats:
         st.caption(f"💬 {len(st.session_state.chats)} messages")
