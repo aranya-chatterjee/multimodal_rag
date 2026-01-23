@@ -32,66 +32,45 @@ class RAGSearch:
             print(f"[RAGSearch] Vector store manager type: {type(vector_store_manager)}")
     
     def _format_source_info(self, result, index: int) -> Dict[str, Any]:
-    """Format source information based on content type"""
-        metadata = result.metadata
+    	"""Format source information based on content type"""
+    	metadata = result.metadata
     
-    # SAFE: Get source type with default
-        source_type = metadata.get('source_type', 'unknown')
-    
-        if source_type == 'video':
-        # SAFE: Get video name with default
-            video_name = metadata.get('file_name')
-            if video_name is None:
-                video_name = metadata.get('filename', 'Unknown Video')
-            if video_name is None:
-                video_name = 'Unknown Video'
+    	if metadata.get('source_type') == 'video':
+        	# Get video name safely
+        	video_name = metadata.get('file_name', 'Unknown Video')
+        	source_text = f"Video: {video_name}"
         
-            source_text = f"Video: {video_name}"
+        	# Handle duration safely
+        	duration = metadata.get('duration')
+        	if duration is not None:
+            	try:
+                	source_text += f" ({float(duration):.2f}s)"
+            	except (ValueError, TypeError):
+                	source_text += f" (Duration: {duration})"
         
-        # SAFE: Handle duration
-            duration = metadata.get('duration')
-            if duration is not None:
-                try:
-                # Convert to float if needed
-                    if isinstance(duration, str):
-                        duration = float(duration)
-                    if isinstance(duration, (int, float)):
-                        source_text += f" ({duration:.2f}s)"
-                    else:
-                        source_text += f" (Duration: {str(duration)})"
-                except (ValueError, TypeError):
-                    source_text += f" (Duration: {str(duration)})"
+        # Get transcript info
+        	has_transcript = metadata.get('has_transcript', False)
+        	transcript_source = metadata.get('transcript_source', 'unknown')
         
-        # SAFE: Get transcript info
-            has_transcript = metadata.get('has_transcript', False)
-            transcript_source = metadata.get('transcript_source', 'unknown')
+        	return {
+            	'source_type': 'video',
+            	'metadata': metadata,
+            	'citation': f"[Source {index+1}: {source_text}]",
+            	'content_preview': result.page_content[:200] + "..." if len(result.page_content) > 200 else result.page_content,
+            	'has_transcript': has_transcript,
+            	'transcript_source': transcript_source
+        	}
+    	else:
+        	# Document source
+        	doc_name = metadata.get('file_name', 'Unknown Document')
+        	source_text = f"Document: {doc_name}"
         
-            return {
-                'source_type': 'video',
-                'metadata': metadata,
-                'citation': f"[Source {index+1}: {source_text}]",
-                'content_preview': result.page_content[:200] + "..." if len(result.page_content) > 200 else result.page_content,
-                'has_transcript': has_transcript,
-                'transcript_source': transcript_source,
-                'duration': duration
-            }
-        else:
-        # Document or unknown source
-        # SAFE: Get document name
-            doc_name = metadata.get('file_name')
-            if doc_name is None:
-                doc_name = metadata.get('filename', 'Unknown Document')
-            if doc_name is None:
-                doc_name = 'Unknown Document'
-        
-            source_text = f"Document: {doc_name}"
-        
-            return {
-                'source_type': 'document' if source_type != 'video' else source_type,
-                'metadata': metadata,
-                'citation': f"[Source {index+1}: {source_text}]",
-                'content_preview': result.page_content[:200] + "..." if len(result.page_content) > 200 else result.page_content
-            }
+        	return {
+            	'source_type': 'document',
+            	'metadata': metadata,
+            	'citation': f"[Source {index+1}: {source_text}]",
+            	'content_preview': result.page_content[:200] + "..." if len(result.page_content) > 200 else result.page_content
+        	}
     
     def _create_context_prompt(self, context_parts: List[str], source_overview: str, 
                               sources_info: List[Dict], query: str) -> str:
