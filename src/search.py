@@ -32,45 +32,45 @@ class RAGSearch:
             print(f"[RAGSearch] Vector store manager type: {type(vector_store_manager)}")
     
     def _format_source_info(self, result, index: int) -> Dict[str, Any]:
-    	"""Format source information based on content type"""
-    	metadata = result.metadata
-    
-    	if metadata.get('source_type') == 'video':
-        	# Get video name safely
-        	video_name = metadata.get('file_name', 'Unknown Video')
-        	source_text = f"Video: {video_name}"
+        """Format source information based on content type"""
+        metadata = result.metadata
         
-        	# Handle duration safely
-        	duration = metadata.get('duration')
-        	if duration is not None:
-            	try:
-                	source_text += f" ({float(duration):.2f}s)"
-            	except (ValueError, TypeError):
-                	source_text += f" (Duration: {duration})"
-        
-        # Get transcript info
-        	has_transcript = metadata.get('has_transcript', False)
-        	transcript_source = metadata.get('transcript_source', 'unknown')
-        
-        	return {
-            	'source_type': 'video',
-            	'metadata': metadata,
-            	'citation': f"[Source {index+1}: {source_text}]",
-            	'content_preview': result.page_content[:200] + "..." if len(result.page_content) > 200 else result.page_content,
-            	'has_transcript': has_transcript,
-            	'transcript_source': transcript_source
-        	}
-    	else:
-        	# Document source
-        	doc_name = metadata.get('file_name', 'Unknown Document')
-        	source_text = f"Document: {doc_name}"
-        
-        	return {
-            	'source_type': 'document',
-            	'metadata': metadata,
-            	'citation': f"[Source {index+1}: {source_text}]",
-            	'content_preview': result.page_content[:200] + "..." if len(result.page_content) > 200 else result.page_content
-        	}
+        if metadata.get('source_type') == 'video':
+            # Get video name safely
+            video_name = metadata.get('file_name', 'Unknown Video')
+            source_text = f"Video: {video_name}"
+            
+            # Handle duration safely
+            duration = metadata.get('duration')
+            if duration is not None:
+                try:
+                    source_text += f" ({float(duration):.2f}s)"
+                except (ValueError, TypeError):
+                    source_text += f" (Duration: {duration})"
+            
+            # Get transcript info
+            has_transcript = metadata.get('has_transcript', False)
+            transcript_source = metadata.get('transcript_source', 'unknown')
+            
+            return {
+                'source_type': 'video',
+                'metadata': metadata,
+                'citation': f"[Source {index+1}: {source_text}]",
+                'content_preview': result.page_content[:200] + "..." if len(result.page_content) > 200 else result.page_content,
+                'has_transcript': has_transcript,
+                'transcript_source': transcript_source
+            }
+        else:
+            # Document source
+            doc_name = metadata.get('file_name', 'Unknown Document')
+            source_text = f"Document: {doc_name}"
+            
+            return {
+                'source_type': 'document',
+                'metadata': metadata,
+                'citation': f"[Source {index+1}: {source_text}]",
+                'content_preview': result.page_content[:200] + "..." if len(result.page_content) > 200 else result.page_content
+            }
     
     def _create_context_prompt(self, context_parts: List[str], source_overview: str, 
                               sources_info: List[Dict], query: str) -> str:
